@@ -24,16 +24,33 @@ EXCLUDES=(
   "/proc/*"
   "/sys/*"
   "/tmp/*"
+  "/run/*"
 )
 
 CREATE_ARGS=(
   --info
   --stats
   --list
-  --filter E
+  --filter AME
   --compression auto,zstd
   --show-rc
   --exclude-caches
+  --one-file-system
+)
+
+PRUNE_ARGS=(
+  --list
+  --stats
+  --prefix '{hostname}-'
+  --show-rc
+)
+
+KEEP=(
+  --keep-within   2d
+  --keep-daily    31
+  --keep-weekly   12
+  --keep-monthly  12
+  --keep-yearly   10
 )
 
 # Empty by default
@@ -55,19 +72,19 @@ runborg() {
   ( set -x ; BORG_REPO=${BORG_REPO} /usr/local/bin/borg "$@" )
 }
 
-cmdbackup() {
+cmd_create() {
   if [ -z "$BORG_REPO" ]; then
     info "Can't do a backup without basic configuration."
     exit 1;
   fi
 
-    EXCLUDE_ARGS=()
+  EXCLUDE_ARGS=()
 
-    for EXCLUDE in "${EXCLUDES[@]}"; do
-      EXCLUDE_ARGS+=( --exclude "${EXCLUDE}" )
-    done
+  for EXCLUDE in "${EXCLUDES[@]}"; do
+    EXCLUDE_ARGS+=( --exclude "${EXCLUDE}" )
+  done
 
-  info "Backing up to '$BORG_REPO'"
+  info "Starting backup"
 
   runborg create \
     "${CREATE_ARGS[@]}" \
@@ -76,6 +93,20 @@ cmdbackup() {
     "${PATHS[@]}"
 }
 
+cmd_prune() {
+  if [ -z "$BORG_REPO" ]; then
+    info "Can't prune without basic configuration."
+    exit 1;
+  fi
+
+  info "Pruning"
+
+  runborg prune \
+    "${PRUNE_ARGS[@]}" \
+    "${KEEP[@]}" \
+    ::
+
+}
 
 if [ -f "$CONF_FILE" ]; then
   # shellcheck disable=SC1090
@@ -105,7 +136,8 @@ done
 # Hijack poisitional commands and add our own.
 case "$FIRSTBARG" in
   backup)
-    cmdbackup "test"
+    cmd_create
+    cmd_prune
 
     ;;
   *)
