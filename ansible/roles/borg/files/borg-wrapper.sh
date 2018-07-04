@@ -25,6 +25,9 @@ EXCLUDES=(
   "/sys/*"
   "/tmp/*"
   "/run/*"
+  "/var/cache/*"
+  "/var/tmp/*"
+  "/home/*/.cache/*"
 )
 
 CREATE_ARGS=(
