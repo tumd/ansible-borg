@@ -1,0 +1,25 @@
+---
+- name: Download borg-binary
+  get_url:
+    dest: "/usr/local/bin/borg"
+    checksum: "{{ borg_checksum }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    url: "{{ borg_url }}"
+    validate_certs: "{{ 'yes' if (ansible_python_version is version('2.7.9', '>=')) else 'no' }}"
+
+- name: Ensure borg-binary permissions
+  file:
+    dest: "/usr/local/bin/borg"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Install borg-wrapper
+  copy:
+    dest: "/usr/local/bin/borg-wrapper.sh"
+    src: "borg-wrapper.sh"
+    owner: "root"
+    group: "root"
+    mode: "0755"

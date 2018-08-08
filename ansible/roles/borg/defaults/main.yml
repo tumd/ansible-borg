@@ -1,0 +1,9 @@
+---
+
+borg_version: "1.1.6"
+borg_arch: "{{ '64' if ansible_architecture == 'x86_64' else '32' }}"
+borg_url: "https://github.com/borgbackup/borg/releases/download/{{ borg_version }}/borg-linux{{ borg_arch }}"
+borg_checksum: "{{ borg_checksum_map[borg_arch] }}"
+borg_checksum_map: 
+  "64": "sha256:cc5211b19954fa27bd9d6ee609765d3e7b39d4feecc42adb3207a418746136d9"
+  "32": "sha256:ee4229dfab3cce38c878390384c427babee7f7c9c3539239c3cee168fcc01da7"
