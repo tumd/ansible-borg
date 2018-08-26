@@ -8,6 +8,9 @@
     mode: "0755"
     url: "{{ borg_url }}"
     validate_certs: "{{ 'yes' if (ansible_python_version is version('2.7.9', '>=')) else 'no' }}"
+  when: ( borg_binary|bool or inventory_hostname in groups.borg_servers|d([]) )
+  tags: borg-install
+
 
 - name: Ensure borg-binary permissions
   file:
@@ -15,6 +18,8 @@
     owner: "root"
     group: "root"
     mode: "0755"
+  when: borg_wrapper|bool
+  tags: borg-install
 
 - name: Install borg-wrapper
   copy:
@@ -23,3 +28,5 @@
     owner: "root"
     group: "root"
     mode: "0755"
+  when: borg_wrapper|bool
+  tags: borg-install
