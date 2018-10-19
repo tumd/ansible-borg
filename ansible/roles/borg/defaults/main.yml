@@ -18,8 +18,26 @@ borg_checksum_map:
 borg_server_list:
   - "{{ groups.borg_servers[0]|d([]) }}"
 
-borg_server_home: "/home"
-borg_server_bdir: "backup"
+# Set the fqdn for the backupserver clients should use for connection.
+# Will lookup specific address set on the backup-server's config, and fallback
+# to it's FQDN.
+#
+# Server address may be tricky if your backup-server is inside (evil) NAT.
+borg_server_address: "{{ hostvars[borg_server_item].borg_server_address |
+                          default( hostvars[borg_server_item].ansible_fqdn )}}"
+
+borg_server_port: "{{ hostvars[borg_server_item].borg_server_port |
+                          default( '22' )}}"
+
+# Be able to specify the path of backup-clients home-dir.
+# Defaults to '/home'
+borg_server_home: "{{ hostvars[borg_server_item].borg_server_home |
+                        default( '/home' ) }}"
+
+# Set backup-dir in backup-clients home.
+# Defaults to 'backup/'
+borg_server_bdir:  "{{ hostvars[borg_server_item].borg_server_bdir |
+                        default( 'backup' ) }}"
 
 ### Client
 borg_client_user: root # The user used for backup of a client

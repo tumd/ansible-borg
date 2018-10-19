@@ -8,6 +8,7 @@
   loop_control:
     loop_var: 'borg_server_item'
   with_items: "{{ borg_server_list }}"
+  when: borg_server_item != inventory_hostname
 
 # - name: "Find all 'id_rsa_{{ borg_client_sshkey_name }}_'-files"
 #   find:

@@ -72,3 +72,25 @@
   when: ( borg_enabled|bool 
         or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
         # This will fail if the user doesn't exists but the home-dir does.
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Gather some facts"
+  setup:
+    gather_subset:
+      - '!all'
+      - '!any'
+      - 'min'
+  delegate_to: "{{ borg_server_item }}"
+  when: borg_enabled|bool
+
+- name: "Setup {{ hostvars[borg_server_item].inventory_hostname_short }} in known-hosts"
+  known_hosts:
+    path: "~{{ borg_client_user }}/.ssh/known_hosts"
+    name: "{{ hostvars[borg_server_item].inventory_hostname_short }}"
+    key: "{{ hostvars[borg_server_item].inventory_hostname_short }},{{ borg_server_address }} ecdsa-sha2-nistp256 {{ hostvars[borg_server_item].ansible_ssh_host_key_ecdsa_public }}"
+
+- name: debug
+  debug:
+    msg: "{{ item }}"
+  with_items:
+    - "{{ borg_server_address }}"
+    - "{{ borg_server_port }}"
