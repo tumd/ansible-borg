@@ -58,6 +58,7 @@ KEEP=(
 
 # Empty by default
 BORG_REPO="${BORG_REPO:-}"
+BORG_RSH="${BORG_RSH:-ssh}"
 
 # Lookup configuration-file
 BCONF="${BCONF:="default"}.conf"
@@ -72,7 +73,7 @@ CONF_FILE="${CONF_PATH}/${BCONF}"
 info() { printf '### %s ### %s\n' "$( date "+%F %T" )" "$*" >&2; }
 
 runborg() { 
-  ( set -x ; BORG_REPO=${BORG_REPO} /usr/local/bin/borg "$@" )
+  ( set -x ; BORG_REPO=${BORG_REPO} BORG_RSH=${BORG_RSH} /usr/local/bin/borg "$@" )
 }
 
 cmd_create() {
