@@ -1,0 +1,61 @@
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Create repo user"
+  user:
+    name: "{{ inventory_hostname_short }}"
+    create_home: yes
+    skeleton: "/dev/null"
+    shell: "/bin/bash"
+    comment: "Borg repo for {{ inventory_hostname }}"
+    home: "{{ borg_server_home }}/{{ inventory_hostname_short }}"
+    password: "!"
+  delegate_to: "{{ borg_server_item }}"
+  when: borg_enabled|bool
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Check if user's home exists"
+  stat:
+    path: "{{ borg_server_home }}/{{ inventory_hostname_short }}"
+  register: repo_home_dir
+  delegate_to: "{{ borg_server_item }}"
+  when: not borg_enabled|bool
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Deploy ssh-keys"
+  authorized_key:
+    user: "{{ inventory_hostname_short }}"
+    exclusive: yes
+    key: "{{ (borg_manager_sshkeys|d([]) + ( [ user_ssh_key.ssh_public_key ] if borg_enabled|bool else [] )) | join('\n') | string }}"
+    key_options: "restrict,command=\"/usr/local/bin/borg serve --restrict-to-repository {{ borg_server_home }}/{{ inventory_hostname_short }}/{{ borg_server_bdir }}/\""
+    state: "present"
+  delegate_to: "{{ borg_server_item }}"
+  when: ( borg_enabled|bool
+        or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Ensure permissions"
+  file:
+    path: "{{ item.dir }}"
+    state: "directory"
+    owner: "{{ item.owner|d('root') }}"
+    group: "{{ item.group|d(inventory_hostname_short) }}"
+    mode: "{{ item.mode|d('0550') }}"
+    recurse: "{{ item.recurse|d('no') }}"
+  with_items:
+    - dir: "{{ borg_server_home }}/{{ inventory_hostname_short }}/"
+    - dir: "{{ borg_server_home }}/{{ inventory_hostname_short }}/.ssh/"
+      recurse: "yes"
+    - dir: "{{ borg_server_home }}/{{ inventory_hostname_short }}/{{ borg_server_bdir }}/"
+      owner: "{{ inventory_hostname_short }}"
+      group: "{{ inventory_hostname_short }}"
+      mode: '0750'
+  delegate_to: "{{ borg_server_item }}"
+  when: ( borg_enabled|bool
+        or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
+        # This will fail if the user doesn't exists but the home-dir does.
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Gather some facts"
+  setup:
+    gather_subset:
+      - "!all"
+      - "!any"
+      - "min"
+  delegate_to: "{{ borg_server_item }}"
+  delegate_facts: True
+  run_once: True
+  when: borg_enabled|bool

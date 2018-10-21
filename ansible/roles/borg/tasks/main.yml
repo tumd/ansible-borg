@@ -4,7 +4,7 @@
   tags: borg-install
 
 - name: "Configure borg client and remote repo"
-  include_tasks: clientrepo.yml
+  include_tasks: client.yml
   loop_control:
     loop_var: 'borg_server_item'
   with_items: "{{ borg_server_list }}"
