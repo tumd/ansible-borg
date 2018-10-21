@@ -40,9 +40,9 @@ borg_server_bdir:  "{{ hostvars[borg_server_item].borg_server_bdir |
                         default( 'backup' ) }}"
 
 ### Client
-borg_client_user: root # The user used for backup of a client
-borg_client_sshkey_name: borg # Use an unique ssh-key for communicating with backup-server
-borg_client_sshkey_bits: 4096
+borg_client_user: "root" # The user used for backup of a client
+borg_client_sshkey_name: "borg" # Use an unique ssh-key for communicating with backup-server
+borg_client_sshkey_bits: "4096"
 
 ### Manager
 borg_manager_sshkeys: []
