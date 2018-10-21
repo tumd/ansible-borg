@@ -59,3 +59,21 @@
     name: "[{{ borg_server_address }}]:{{ borg_server_port}}"
     key: "[{{ borg_server_address }}]:{{ borg_server_port}} ssh-rsa {{ hostvars[borg_server_item].ansible_ssh_host_key_rsa_public }}"
   when: borg_enabled|bool
+
+- name: "Ensure configuration directory exists"
+  file:
+    path: "~{{ borg_client_user }}/.config/borg/"
+    state: "directory"
+    owner: "{{ borg_client_user }}"
+    group: "{{ borg_client_user }}"
+    mode: "0700"
+  when: borg_enabled|bool
+
+- name: "Create configuration file"
+  template:
+    src: "client.conf.j2"
+    dest: "~{{ borg_client_user }}/.config/borg/{{ hostvars[borg_server_item].inventory_hostname_short }}.conf"
+    owner: "{{ borg_client_user }}"
+    group: "{{ borg_client_user }}"
+    mode: "0700"
+  when: borg_enabled|bool
