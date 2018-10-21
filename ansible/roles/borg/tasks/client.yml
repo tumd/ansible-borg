@@ -11,12 +11,12 @@
       - "hostvars[borg_server_item].inventory_hostname_short"
     msg: "The node passed as a borg-repository doesn't seem to be a valid host in the inventory. 'borg_server_item'={{ borg_server_item }}"
 
-- name: "Generate ssh-key 'id_rsa_{{ borg_client_sshkey_name }}_{{ hostvars[borg_server_item].inventory_hostname_short }}'"
+- name: "Generate ssh-key '{{ borg_client_sshkey_name }}'"
   user:
     name: "{{ borg_client_user }}"
     generate_ssh_key: yes
     ssh_key_bits: "{{ borg_client_sshkey_bits }}"
-    ssh_key_file: "~{{ borg_client_user }}/.ssh/id_rsa_{{ borg_client_sshkey_name }}_{{ hostvars[borg_server_item].inventory_hostname_short }}"
+    ssh_key_file: "~{{ borg_client_user }}/.ssh/{{ borg_client_sshkey_name }}"
     ssh_key_comment: "{{ borg_client_user }}@{{ borg_server_user }} for borg"
     ssh_key_type: "rsa"
   register: user_ssh_key

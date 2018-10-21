@@ -47,8 +47,13 @@ borg_server_user: "{{ inventory_hostname_short if borg_server_user_forceupdate|d
                         else ansible_local.borg_server_user|d(inventory_hostname_short) }}"
 
 ### Client
-borg_client_user: "root"  # The user used for backup of a client
-borg_client_sshkey_name: "borg"  # Use an unique ssh-key for communicating with backup-server
+
+# The user used for backup of a client
+borg_client_user: "root"
+
+# Use an unique ssh-key for communicating with backup-server
+borg_client_sshkey_name: "id_rsa_borg_{{ hostvars[borg_server_item].inventory_hostname_short }}"
+
 borg_client_sshkey_bits: "4096"
 
 ### Manager

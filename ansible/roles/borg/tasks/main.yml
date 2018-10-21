@@ -9,19 +9,3 @@
     loop_var: 'borg_server_item'
   with_items: "{{ borg_server_list }}"
   when: borg_server_item != inventory_hostname
-
-# - name: "Find all 'id_rsa_{{ borg_client_sshkey_name }}_'-files"
-#   find:
-#     paths: "~{{ borg_client_user }}/.ssh/"
-#     pattern: "id_rsa_{{ borg_client_sshkey_name }}_*"
-#   register: find_id_rsa
-
-# - name: "Clean up old ssh-keys."
-#   file:
-#     state: absent
-#     path: "{{ item.path }}"
-#   with_items: "{{ find_id_rsa.files }}"
-#   when: "['neil', 'bertram'] in item.path"
-
-# - debug:
-#     var: groups['borg_servers']| map('extract', hostvars, 'inventory_hostname_short')|list
