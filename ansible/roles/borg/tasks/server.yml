@@ -1,3 +1,4 @@
+---
 - name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Create repo user"
   user:
     name: "{{ inventory_hostname_short }}"

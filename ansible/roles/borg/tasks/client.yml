@@ -30,3 +30,4 @@
     path: "~{{ borg_client_user }}/.ssh/known_hosts"
     name: "[{{ borg_server_address }}]:{{ borg_server_port}}"
     key: "[{{ borg_server_address }}]:{{ borg_server_port}} ssh-rsa {{ hostvars[borg_server_item].ansible_ssh_host_key_rsa_public }}"
+  when: borg_enabled|bool
