@@ -49,7 +49,7 @@
     key_options: "restrict,command=\"/usr/local/bin/borg serve --restrict-to-repository {{ borg_server_home }}/{{ inventory_hostname_short }}/{{ borg_server_bdir }}/\""
     state: "present"
   delegate_to: "{{ borg_server_item }}"
-  when: ( borg_enabled|bool 
+  when: ( borg_enabled|bool
         or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
 
 - name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Ensure permissions"
@@ -69,7 +69,7 @@
       group: "{{ inventory_hostname_short }}"
       mode: '0750'
   delegate_to: "{{ borg_server_item }}"
-  when: ( borg_enabled|bool 
+  when: ( borg_enabled|bool
         or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
         # This will fail if the user doesn't exists but the home-dir does.
 

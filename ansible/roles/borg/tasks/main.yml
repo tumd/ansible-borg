@@ -15,7 +15,7 @@
 #     paths: "~{{ borg_client_user }}/.ssh/"
 #     pattern: "id_rsa_{{ borg_client_sshkey_name }}_*"
 #   register: find_id_rsa
-    
+
 # - name: "Clean up old ssh-keys."
 #   file:
 #     state: absent
