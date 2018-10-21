@@ -39,6 +39,13 @@ borg_server_home: "{{ hostvars[borg_server_item].borg_server_home |
 borg_server_bdir:  "{{ hostvars[borg_server_item].borg_server_bdir |
                         default( 'backup' ) }}"
 
+# The clients username on destination server.
+# On first setup this username will be saved as a local fact on the client,
+# to prevent creating a _new_ user on the server if the client's hostname
+# by some reason gets changed.
+borg_server_user: "{{ inventory_hostname_short if borg_server_user_forceupdate|d(False)|bool
+                        else ansible_local.borg_server_user|d(inventory_hostname_short) }}"
+
 ### Client
 borg_client_user: "root"  # The user used for backup of a client
 borg_client_sshkey_name: "borg"  # Use an unique ssh-key for communicating with backup-server
