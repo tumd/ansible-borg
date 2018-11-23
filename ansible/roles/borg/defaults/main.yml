@@ -1,6 +1,6 @@
 ---
 
-borg_binary: true
+borg_binary: True
 borg_wrapper: "{{ borg_binary }}"
 borg_enabled: "{{ borg_wrapper }}"
 
@@ -17,6 +17,9 @@ borg_checksum_map:
 ### Servers
 borg_server_list:
   - "{{ groups.borg_servers[0]|d([]) }}"
+
+borg_server_enabled: "{{ hostvars[borg_server_item].borg_server_enabled |
+                          default( 'True' )}}"
 
 # Set the fqdn for the backupserver clients should use for connection.
 # Will lookup specific address set on the backup-server's config, and fallback

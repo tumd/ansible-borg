@@ -49,14 +49,3 @@
   when: ( borg_enabled|bool
         or ( repo_home_dir.stat.exists and repo_home_dir.stat.isdir ) )
         # This will fail if the user doesn't exists but the home-dir does.
-
-- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Gather some facts"
-  setup:
-    gather_subset:
-      - "!all"
-      - "!any"
-      - "min"
-  delegate_to: "{{ borg_server_item }}"
-  delegate_facts: True
-  run_once: True
-  when: borg_enabled|bool
