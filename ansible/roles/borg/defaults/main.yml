@@ -59,5 +59,25 @@ borg_client_sshkey_name: "id_rsa_borg_{{ hostvars[borg_server_item].inventory_ho
 
 borg_client_sshkey_bits: "4096"
 
+# List of exclusive paths to backup
+borg_client_exclusive_paths: []
+
+# List of additional paths to backup
+# This is probably the one you want to use.
+borg_client_paths: []
+
+# List of paths/globs to exclude
+borg_client_exclusive_excludes: []
+
+# List of additional paths/globs to exclude
+# This is probably the one you want to use.
+borg_client_excludes: []
+
+# List of additional arguments passed to the create-subcommand.
+borg_client_create_args: []
+
+# List of exclusive prune arguments.
+borg_client_prune_args: []
+
 ### Manager
 borg_manager_sshkeys: []

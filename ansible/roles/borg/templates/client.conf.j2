@@ -5,3 +5,69 @@
 
 BORG_REPO="ssh://{{ borg_server_user }}@{{ borg_server_address }}:{{ borg_server_port}}/~/{{ borg_server_bdir }}"
 BORG_RSH="ssh -i ~{{ borg_client_user }}/.ssh/{{ borg_client_sshkey_name }}"
+{% if borg_client_exclusive_paths is defined
+    and borg_client_exclusive_paths
+    and borg_client_exclusive_paths is iterable %}
+
+# Exclusive paths to backup. Overriding the defaults.
+PATHS=(
+{%   for element in borg_client_exclusive_paths %}
+  "{{ element }}"
+{%   endfor %}
+)
+{% endif %}
+{% if borg_client_paths is defined
+    and borg_client_paths
+    and borg_client_paths is iterable %}
+
+# Additional paths to backup. Expanding the defaults.
+PATHS+=(
+{%   for element in borg_client_paths %}
+  "{{ element }}"
+{%   endfor %}
+)
+{% endif %}
+{% if borg_client_exclusive_excludes is defined
+    and borg_client_exclusive_excludes
+    and borg_client_exclusive_excludes is iterable %}
+
+# Exclusive paths to exclude from backup. Overriding the defaults.
+EXCLUDES=(
+{%   for element in borg_client_exclusive_excludes %}
+  "{{ element }}"
+{%   endfor %}
+)
+{% endif %}
+{% if borg_client_excludes is defined
+    and borg_client_excludes
+    and borg_client_excludes is iterable %}
+
+# Additional paths/globs to exclude from backup. Expanding the defaults.
+EXCLUDES+=(
+{%   for element in borg_client_excludes %}
+  "{{ element }}"
+{%   endfor %}
+)
+{% endif %}
+{% if borg_client_create_args is defined
+    and borg_client_create_args
+    and borg_client_create_args is iterable %}
+
+# Additional create-args overriding the defaults.
+CREATE_ARGS+=(
+{%   for element in borg_client_create_args %}
+  {{ element }}
+{%   endfor %}
+)
+{% endif %}
+{% if borg_client_prune_args is defined
+    and borg_client_prune_args
+    and borg_client_prune_args is iterable %}
+
+# Additional prune-args overriding the defaults.
+PRUNE_ARGS+=(
+{%   for element in borg_client_prune_args %}
+  {{ element }}
+{%   endfor %}
+)
+{% endif %}
