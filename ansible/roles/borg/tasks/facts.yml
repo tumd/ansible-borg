@@ -1,0 +1,28 @@
+---
+- name: "Make sure that Ansible local facts directory exists"
+  file:
+    path: "/etc/ansible/facts.d"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: "Check if fact 'borg_server_user' exists"
+  stat:
+    path: "/etc/ansible/facts.d/borg_server_user.fact"
+  register: "borg_server_user_fact_stat"
+
+- name: "Save 'borg_server_user' local facts"
+  copy:
+    content: "{{ borg_server_user | to_nice_json }}"
+    dest: '/etc/ansible/facts.d/borg_server_user.fact'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  register: "borg_server_user_facts"
+  when: not borg_server_user_fact_stat.stat.exists
+          or borg_server_user_forceupdate|d(False)|bool
+
+- name: Update Ansible facts if they were modified
+  action: setup
+  when: borg_server_user_facts is defined and borg_server_user_facts is changed

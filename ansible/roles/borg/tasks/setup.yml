@@ -1,0 +1,77 @@
+---
+- name: "Debug server {{ borg_server_item }}"
+  debug:
+    var: "hostvars[borg_server_item]"
+    verbosity: 2
+
+- name: "Verify '{{ borg_server_item }}'"
+  assert:
+    that:
+      - "hostvars[borg_server_item] is defined"
+      - "hostvars[borg_server_item].inventory_hostname_short"
+    msg: "The node passed as a borg-repository doesn't seem to be a valid host in the inventory. 'borg_server_item'={{ borg_server_item }}"
+
+- name: "@{{ hostvars[borg_server_item].inventory_hostname_short }} | Gather some facts"
+  setup:
+    gather_subset:
+      - "!all"
+      - "!any"
+      - "min"
+  delegate_to: "{{ borg_server_item }}"
+  delegate_facts: True
+  run_once: True
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- name: "Generate ssh-key '{{ borg_client_sshkey_name }}'"
+  user:
+    name: "{{ borg_client_user }}"
+    generate_ssh_key: yes
+    ssh_key_bits: "{{ borg_client_sshkey_bits }}"
+    ssh_key_file: "~{{ borg_client_user }}/.ssh/{{ borg_client_sshkey_name }}"
+    ssh_key_comment: "{{ borg_client_user }}@{{ borg_server_user }} for borg"
+    ssh_key_type: "rsa"
+  register: user_ssh_key
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- include_tasks: server.yml
+  tags: [ "borg_server" ]
+
+- name: "Setup [{{ borg_server_address }}]:{{ borg_server_port}} in .ssh/known-hosts"
+  known_hosts:
+    path: "~{{ borg_client_user }}/.ssh/known_hosts"
+    name: "[{{ borg_server_address }}]:{{ borg_server_port}}"
+    key: "[{{ borg_server_address }}]:{{ borg_server_port}} ssh-rsa {{ hostvars[borg_server_item].ansible_ssh_host_key_rsa_public }}"
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- name: "Ensure configuration directory exists"
+  file:
+    path: "~{{ borg_client_user }}/.config/borg/"
+    state: "directory"
+    owner: "{{ borg_client_user }}"
+    group: "{{ borg_client_user }}"
+    mode: "0700"
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- name: "Create configuration file"
+  template:
+    src: "client.conf.j2"
+    dest: "~{{ borg_client_user }}/.config/borg/{{ hostvars[borg_server_item].inventory_hostname_short }}.conf"
+    owner: "{{ borg_client_user }}"
+    group: "{{ borg_client_user }}"
+    mode: "0700"
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- name: "Create default.conf symlink to '{{ groups.borg_servers[0]|d([]) }}'"
+  file:
+    src: "{{ hostvars[borg_server_item].inventory_hostname_short }}.conf"
+    dest: "~{{ borg_client_user }}/.config/borg/default.conf"
+    owner: "{{ borg_client_user }}"
+    group: "{{ borg_client_user }}"
+    state: link
+  when: ( borg_enabled|bool and borg_server_enabled|bool ) and
+          borg_server_item == groups.borg_servers[0]
+
+- include_tasks: facts.yml
+  tags: [ "borg_facts" ]
+
+  # when: borg_server_enabled|bool

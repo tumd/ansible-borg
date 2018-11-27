@@ -59,6 +59,24 @@ borg_client_sshkey_name: "id_rsa_borg_{{ hostvars[borg_server_item].inventory_ho
 
 borg_client_sshkey_bits: "4096"
 
+# Bellow arguments and options can be used with different
+# settings for each repository server, expanding the lists in a map-lookup.
+# For example;
+#
+# borg_client_exclusive_paths: "{{ borg_client_exclusive_paths_map[borg_server_item] |
+#                          default(borg_client_exclusive_paths_map['default']) }}"
+#
+# borg_client_exclusive_paths_map:
+#   "server1":
+#     - "/"
+#     - "/var"
+#   "server2":
+#     - "/"
+#     - "/boot"
+#   "default":
+#     - "/"
+#
+
 # List of exclusive paths to backup
 borg_client_exclusive_paths: []
 

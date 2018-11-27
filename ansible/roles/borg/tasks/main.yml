@@ -3,8 +3,8 @@
   when: ( borg_binary|bool or inventory_hostname in groups.borg_servers|d([]) )
   tags: borg-install
 
-- name: "Configure borg client and remote repo"
-  include_tasks: client.yml
+- name: "Setup borg client and remote repo"
+  include_tasks: setup.yml
   loop_control:
     loop_var: 'borg_server_item'
   with_items: "{{ borg_server_list }}"
