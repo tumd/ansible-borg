@@ -61,17 +61,32 @@
     mode: "0700"
   when: ( borg_enabled|bool and borg_server_enabled|bool )
 
-- name: "Create default.conf symlink to '{{ groups.borg_servers[0]|d([]) }}'"
+- name: "Create default.conf symlink to '{{ groups.borg_servers[0]|d([]) }}.conf'"
   file:
     src: "{{ hostvars[borg_server_item].inventory_hostname_short }}.conf"
     dest: "~{{ borg_client_user }}/.config/borg/default.conf"
     owner: "{{ borg_client_user }}"
     group: "{{ borg_client_user }}"
     state: link
+    force: yes
   when: ( borg_enabled|bool and borg_server_enabled|bool ) and
           borg_server_item == groups.borg_servers[0]
 
 - include_tasks: facts.yml
   tags: [ "borg_facts" ]
 
-  # when: borg_server_enabled|bool
+- name: "Initiate borg-repository on {{ hostvars[borg_server_item].inventory_hostname_short }}"
+  command: "borg-wrapper.sh init --encryption=keyfile-blake2"
+  environment:
+    - BCONF: "{{ hostvars[borg_server_item].inventory_hostname_short }}"
+    - BORG_PASSPHRASE: ""
+  args:
+    creates: "~{{ borg_client_user }}/.config/borg/keys"
+  register: borg_repo_init
+  when:
+    - ( borg_repo_fact.configured is defined and borg_repo_fact.configured )
+    - ( borg_repo_fact.repository is not defined or
+        borg_repo_fact.repository.id is not defined )
+
+- name: Show what borg_repo_init says.
+  debug: msg="{{ borg_repo_init }}"

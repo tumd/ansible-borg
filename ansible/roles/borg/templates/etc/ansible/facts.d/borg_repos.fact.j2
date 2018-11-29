@@ -1,0 +1,29 @@
+#!/usr/bin/python{{ '2' if (ansible_python_version is version_compare('3.5', '<')) else '3' }}
+
+# {{ ansible_managed }}
+
+
+from __future__ import print_function
+from json import dumps, loads
+import subprocess
+import os
+
+output = {"configured": True}
+borg_info_output = ""
+my_env = os.environ.copy()
+my_env["BCONF"] = "{{ hostvars[borg_server_item].inventory_hostname_short }}"
+
+try:
+    FNULL = open('/dev/null', 'w')
+    proc = subprocess.Popen(
+        ['borg-wrapper.sh', 'info', '--json'],
+        stdout=subprocess.PIPE, stderr=FNULL, env=my_env)
+    (borg_info_output, _) = proc.communicate()
+
+except subprocess.CalledProcessError:
+    pass
+
+if borg_info_output:
+    output.update(loads(borg_info_output))
+
+print(dumps(output, sort_keys=True, indent=2))

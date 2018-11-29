@@ -12,17 +12,39 @@
     path: "/etc/ansible/facts.d/borg_server_user.fact"
   register: "borg_server_user_fact_stat"
 
-- name: "Save 'borg_server_user' local facts"
+- name: "Save local fact 'borg_server_user'"
   copy:
     content: "{{ borg_server_user | to_nice_json }}"
-    dest: '/etc/ansible/facts.d/borg_server_user.fact'
-    owner: 'root'
-    group: 'root'
-    mode: '0644'
+    dest: "/etc/ansible/facts.d/borg_server_user.fact"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   register: "borg_server_user_facts"
   when: not borg_server_user_fact_stat.stat.exists
           or borg_server_user_forceupdate|d(False)|bool
 
-- name: Update Ansible facts if they were modified
+- name: "Save local fact 'borg_repo_{{ hostvars[borg_server_item].inventory_hostname_short }}'"
+  template:
+    src: "etc/ansible/facts.d/borg_repos.fact.j2"
+    dest: "/etc/ansible/facts.d/borg_repo_{{ hostvars[borg_server_item].inventory_hostname_short }}.fact"
+    owner: "root"
+    group: "root"
+    mode: "0750"
+  register: "borg_repo_facts"
+  when: ( borg_enabled|bool and borg_server_enabled|bool )
+
+- name: Update Ansible facts if modified
   action: setup
-  when: borg_server_user_facts is defined and borg_server_user_facts is changed
+  when: ( borg_server_user_facts is defined and borg_server_user_facts is changed ) or
+        ( borg_repo_facts is defined and borg_repo_facts is changed )
+
+- name: "Set borg_repo_fact with data from ansible_local.borg_repo_{{ hostvars[borg_server_item].inventory_hostname_short }}"
+  set_fact:
+    borg_repo_fact: "{{ ansible_local['borg_repo_' + repo ] }}"
+  vars:
+    repo: "{{ hostvars[borg_server_item].inventory_hostname_short }}"
+
+- name: Debugs
+  debug:
+    var: "borg_repo_fact"
+    verbosity: 1
