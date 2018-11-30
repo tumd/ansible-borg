@@ -1,0 +1,40 @@
+---
+- name: "Create borg-config directory on '{{ borg_manager_host }}' (manager)"
+  file:
+    path: "~/.config/borg/keys/"
+    state: "directory"
+    mode: "0700"
+  delegate_to: "{{ borg_manager_host }}"
+
+- name: "Create configuration file for {{ borg_server_user }} on manager"
+  template:
+    src: "client-repo.j2"
+    dest: "~/.config/borg/{{ borg_server_user }}{{ '_' + hostvars[borg_server_item].inventory_hostname_short if borg_server_item != groups.borg_servers[0] else '' }}.conf"
+    mode: "0700"
+    backup: True
+  delegate_to: "{{ borg_manager_host }}"
+
+- name: "Save keyfile to manager"
+  fetch:
+    src: "{{ borg_repo_fact.encryption.keyfile }}"
+    dest: "~/.config/borg/keys/{{ borg_server_user }}{{ '_' + hostvars[borg_server_item].inventory_hostname_short if borg_server_item != groups.borg_servers[0] else '' }}"
+    flat: True
+    validate_checksum: True
+    backup: True
+
+- name: "Ensure permissions on manager"
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state|d('directory') }}"
+    owner: "{{ item.owner|d(omit) }}"
+    group: "{{ item.group|d(omit) }}"
+    mode: "{{ item.mode|d('0700') }}"
+    recurse: "{{ item.recurse|d('no') }}"
+  with_items:
+    - path: "~/.config/borg/"
+    - path: "~/.config/borg/security/"
+    - path: "~/.config/borg/keys/"
+    - path: "~/.config/borg/keys/{{ borg_server_user }}{{ '_' + hostvars[borg_server_item].inventory_hostname_short if borg_server_item != groups.borg_servers[0] else '' }}"
+      state: "file"
+      mode: "0600"
+  delegate_to: "{{ borg_manager_host }}"

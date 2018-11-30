@@ -98,4 +98,6 @@ borg_client_create_args: []
 borg_client_prune_args: []
 
 ### Manager
+borg_manager_host: "localhost"
+
 borg_manager_sshkeys: []

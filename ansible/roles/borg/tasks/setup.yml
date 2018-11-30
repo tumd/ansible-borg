@@ -89,4 +89,38 @@
         borg_repo_fact.repository.id is not defined )
 
 - name: Show what borg_repo_init says.
-  debug: msg="{{ borg_repo_init }}"
+  debug:
+    var: "borg_repo_init"
+    verbosity: 1
+
+- name: "Ensure borg-config permissions on client"
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state|d('directory') }}"
+    owner: "{{ item.owner|d(borg_client_user) }}"
+    group: "{{ item.group|d(borg_client_user) }}"
+    mode: "{{ item.mode|d('0700') }}"
+    recurse: "{{ item.recurse|d('no') }}"
+  with_items:
+    - path: "~{{ borg_client_user }}/.config/borg/"
+    - path: "~{{ borg_client_user }}/.config/borg/security/"
+    - path: "~{{ borg_client_user }}/.config/borg/keys/"
+    - path: "{{ borg_repo_fact.encryption.keyfile }}"
+      state: "file"
+      mode: "0600"
+  when:
+    - ( borg_repo_fact.repository is defined and
+        borg_repo_fact.repository.id is defined )
+
+- when: borg_repo_fact.encryption.keyfile is defined
+  tags: [ "borg_manager" ]
+  become: False
+  block:
+    - include_tasks: manager.yml
+  rescue:
+    - debug:
+        msg: >
+          Something failed with saving the borg configuration
+          and keys on '{{ borg_manager_host  }}'. However, this isn't strictly
+          necessary for daily backup activities - only for key-backup and
+          convenient.

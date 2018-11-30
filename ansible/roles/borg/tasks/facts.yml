@@ -33,7 +33,7 @@
   register: "borg_repo_facts"
   when: ( borg_enabled|bool and borg_server_enabled|bool )
 
-- name: Update Ansible facts if modified
+- name: "Update Ansible facts if modified"
   action: setup
   when: ( borg_server_user_facts is defined and borg_server_user_facts is changed ) or
         ( borg_repo_facts is defined and borg_repo_facts is changed )
@@ -44,7 +44,7 @@
   vars:
     repo: "{{ hostvars[borg_server_item].inventory_hostname_short }}"
 
-- name: Debugs
+- name: "Show content of borg_repo_fact"
   debug:
     var: "borg_repo_fact"
     verbosity: 1

@@ -1,9 +1,5 @@
-# {{ ansible_managed }}
-#
-# To use this specific configuration with borg-wrapper, use it like this;
-#   BCONF={{ hostvars[borg_server_item].inventory_hostname_short }} borg-wrapper.sh
+{% include 'client-repo.j2' %}
 
-BORG_REPO="ssh://{{ borg_server_user }}@{{ borg_server_address }}:{{ borg_server_port}}/~/{{ borg_server_bdir }}"
 BORG_RSH="ssh -i ~{{ borg_client_user }}/.ssh/{{ borg_client_sshkey_name }}"
 {% if borg_client_exclusive_paths is defined
     and borg_client_exclusive_paths
