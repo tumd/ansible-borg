@@ -64,7 +64,7 @@ BORG_RSH="${BORG_RSH:-ssh}"
 BCONF="${BCONF:="default"}.conf"
 
 # Config location
-CONF_PATH="$HOME/.config/borg"
+CONF_PATH="${HOME:-/root}/.config/borg"
 
 # Full path to config
 CONF_FILE="${CONF_PATH}/${BCONF}"
